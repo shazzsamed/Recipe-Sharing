@@ -5,12 +5,18 @@
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" v-model="email" required />
+        <v-text-field v-model="email" :type="email" required></v-text-field>
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" required />
+        <v-text-field
+          v-model="password"
+          :type="showPassword ? 'text' : 'password'"
+          :append-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append="showPassword = !showPassword"
+          required
+        ></v-text-field>
       </div>
 
       <v-btn
@@ -45,13 +51,13 @@ import { useUserStore } from "@/stores/userStore";
 const email = ref("");
 const password = ref("");
 const loginError = ref("");
+const showPassword = ref(false);
 
 const store = useUserStore();
 
 const loginUser = async () => {
   const login = await store.login(email.value, password.value);
   if (login) loginError.value = login + " ⓘ";
-  email.value = "";
   password.value = "";
 };
 </script>
@@ -66,11 +72,15 @@ const loginUser = async () => {
   text-align: center;
 }
 
+label {
+  text-align: left;
+}
+
 .login-form {
   background: #ffffff;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(35, 2, 2, 0.699);
   max-width: 400px;
   width: 100%;
 }

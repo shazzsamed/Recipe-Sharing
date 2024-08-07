@@ -6,7 +6,7 @@ import router from "@/router";
 export const useUserStore = defineStore("user", () => {
   const error = ref(null);
 
-  async function register(name, email, password) {
+  async function register(name: String, email: String, password: String) {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_APP_URL}/users`,
@@ -18,14 +18,14 @@ export const useUserStore = defineStore("user", () => {
       );
       error.value = null;
       router.push("/login");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error during registration:", err);
       error.value = err.response?.data?.message || "Registration failed";
       return err.response.data;
     }
   }
 
-  async function login(email, password) {
+  async function login(email: String, password: String) {
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_APP_URL}/users/login`,
@@ -36,9 +36,10 @@ export const useUserStore = defineStore("user", () => {
       );
       error.value = null;
       localStorage.setItem("authToken", response.data.token.token);
+      localStorage.setItem("userId", response.data.id);
       localStorage.setItem("username", response.data.name);
-      router.push("/dashb");
-    } catch (err) {
+      router.push("/");
+    } catch (err: any) {
       console.error("Error during login:", err);
       error.value = err.response?.data?.message || "Login failed";
       return err.response.data.message;

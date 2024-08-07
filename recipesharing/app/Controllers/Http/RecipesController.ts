@@ -24,9 +24,11 @@ export default class RecipesController {
   public async create({ request, response }: HttpContextContract) {
     try {
       const recipe = request.body();
+      console.log("recipe", recipe);
       const newRecipe = await Database.table("recipes").insert(recipe);
       response.status(201).json(newRecipe);
     } catch (error) {
+      console.log(error);
       response.status(404).json(error);
     }
   }
@@ -78,7 +80,22 @@ export default class RecipesController {
     }
   }
 
-  // public async destroy({}: HttpContextContract) {}
-
-  //public async edit({}: HttpContextContract) {}
+  public async destroy({ params, response }: HttpContextContract) {
+    try {
+      const recipeId = params.id;
+      const result = await Database.from("recipes")
+        .where("id", recipeId)
+        .delete();
+      if (result === 0) {
+        return response
+          .status(404)
+          .json({ error: "Recipe not found or failed to delete" });
+      }
+      response.status(200).json({ message: "Recipe deleted successfully" });
+    } catch (error) {
+      response
+        .status(500)
+        .json({ error: "An error occurred while deleting the recipe" });
+    }
+  }
 }

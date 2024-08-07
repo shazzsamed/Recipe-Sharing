@@ -5,19 +5,33 @@
 
       <div class="form-group">
         <label for="name">Name</label>
-        <input type="text" id="name" v-model="name" required />
+        <v-text-field v-model="name" :type="text" required></v-text-field>
       </div>
 
       <div class="form-group">
         <label for="email">Email</label>
-        <input type="email" id="email" v-model="email" required />
+        <v-text-field v-model="email" :type="email" required></v-text-field>
       </div>
 
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" v-model="password" required />
+        <v-text-field
+          v-model="password"
+          :type="showPassword ? 'text' : 'password'"
+          :append-icon="showPassword ? 'mdi-eye-off' : 'mdi-eye'"
+          @click:append="showPassword = !showPassword"
+          required
+        ></v-text-field>
       </div>
-      <button type="submit" class="submit-btn">Register</button>
+      <v-btn
+        type="submit"
+        variant="plain"
+        density="comfortable"
+        block
+        rounded="xs"
+        style="margin-bottom: 10px"
+        >Register</v-btn
+      >
       <p class="login-text">Already have an account?</p>
       <button type="button" @click="router.push('/login')" class="login-link">
         Log In
@@ -36,6 +50,7 @@ const name = ref("");
 const email = ref("");
 const password = ref("");
 const registerError = ref("");
+const showPassword = ref(false);
 
 const store = useUserStore();
 
@@ -65,7 +80,7 @@ const registerUser = async () => {
   background: #ffffff;
   padding: 2rem;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(35, 2, 2, 0.699);
   max-width: 400px;
   width: 100%;
 }

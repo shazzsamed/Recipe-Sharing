@@ -44,7 +44,7 @@ export default class UsersController {
       const token = await auth.use("api").generate(user, {
         expiresIn: "30 mins",
       });
-      response.ok({ token: token, name: user.name });
+      response.ok({ token: token, name: user.name, id: user.id });
     } catch (error) {
       response.badRequest(error.message);
     }
