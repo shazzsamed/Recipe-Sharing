@@ -8,15 +8,22 @@ export const useRecipeStore = defineStore("recipeStore", () => {
   const error = ref(null);
   const searchQuery = ref("");
 
-  const filteredRecipes = computed(() => {
-    return recipes.value.filter(
-      (recipe) =>
-        recipe.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        recipe.description
-          .toLowerCase()
-          .includes(searchQuery.value.toLowerCase())
-    );
-  });
+  const searchRecipes = async (query) => {
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_APP_URL}/search`,
+        {
+          params: { q: query },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
+      );
+      recipes.value = response.data;
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
+  };
 
   const fetchRecipes = async (view: String) => {
     loading.value = true;
@@ -87,7 +94,7 @@ export const useRecipeStore = defineStore("recipeStore", () => {
     }
   };
 
-  const updateRecipe = async (id, updatedRecipe) => {
+  const updateRecipe = async (id: String, updatedRecipe: Object) => {
     try {
       const response = await axios.patch(
         `${import.meta.env.VITE_APP_URL}/recipes/${id}`,
@@ -127,7 +134,7 @@ export const useRecipeStore = defineStore("recipeStore", () => {
     loading,
     error,
     searchQuery,
-    filteredRecipes,
+    searchRecipes,
     fetchRecipes,
     createRecipe,
     fetchRecipeById,

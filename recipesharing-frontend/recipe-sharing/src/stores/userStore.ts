@@ -48,16 +48,16 @@ export const useUserStore = defineStore("user", () => {
 
   async function logout() {
     try {
-      await axios.post(`${import.meta.env.VITE_APP_URL}/logout`, null, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-      });
       localStorage.removeItem("authToken");
       localStorage.removeItem("userId");
       localStorage.removeItem("username");
       error.value = null;
       router.push("/login");
+      await axios.post(`${import.meta.env.VITE_APP_URL}/logout`, null, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      });
     } catch (err: any) {
       console.error("Error during logout:", err);
       error.value = err.response?.data?.message || "Logout failed";

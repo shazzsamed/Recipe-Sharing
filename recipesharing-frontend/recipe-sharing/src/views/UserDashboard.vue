@@ -11,12 +11,13 @@
         hide-details
         single-line
         width="80%"
+        @input="recipeStore.searchRecipes(recipeStore.searchQuery)"
       ></v-text-field>
       <v-col cols="10" md="10">
         <div class="mb-4">
           <v-card
             class="mb-4"
-            v-for="recipe in recipeStore.filteredRecipes"
+            v-for="recipe in recipeStore.recipes"
             :key="recipe.id"
             variant="elevated"
             min-height="140"
@@ -25,7 +26,13 @@
             <v-card-title>{{ recipe.title }}</v-card-title>
             <v-card-subtitle>By: {{ recipe.user_name }}</v-card-subtitle>
             <v-card-text>{{ recipe.description }}</v-card-text>
-            <v-rating :value="5" max="5" readonly dense></v-rating>
+            <v-rating
+              :value="recipe.cooking_time"
+              max="60"
+              color="yellow"
+              readonly
+              dense
+            ></v-rating>
             <v-card-actions>
               <v-btn @click="openRecipe(recipe.id)">Open</v-btn>
               <v-btn
@@ -67,10 +74,10 @@ const props = defineProps({
   },
 });
 
-const average = async (recipeId) => {
-  const responseAverage = await reviewStore.fetchAverage(recipeId);
+const average = (recipeId) => {
+  const responseAverage = reviewStore.fetchAverage(recipeId);
   console.log(typeof Number(responseAverage), Number(responseAverage));
-  return Number(responseAverage);
+  return 4;
 };
 
 onMounted(async () => {

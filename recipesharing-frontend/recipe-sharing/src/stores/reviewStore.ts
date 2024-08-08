@@ -57,7 +57,7 @@ export const useReviewStore = defineStore("reviewStore", () => {
       );
       reviews.value.push(response.data);
       return response.data;
-    } catch (err) {
+    } catch (err: any) {
       return err.response.data.message.errors[0].message;
     }
   };
