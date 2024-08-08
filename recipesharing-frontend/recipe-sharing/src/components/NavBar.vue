@@ -26,7 +26,7 @@
         prepend-icon="mdi-logout"
         title="Logout"
         value="logout"
-        @click="logout"
+        @click="userLogout"
       ></v-list-item>
     </v-list>
   </v-navigation-drawer>
@@ -34,9 +34,12 @@
 
 <script setup>
 import router from "@/router";
+import { useUserStore } from "@/stores/userStore";
 import { ref } from "vue";
 
 const userName = ref(localStorage.getItem("username"));
+
+const { logout } = useUserStore();
 
 const goFeed = () => {
   router.push("/").then(() => {
@@ -50,9 +53,7 @@ const goMyRecipes = () => {
   });
 };
 
-const logout = () => {
-  localStorage.setItem("authToken", "");
-  localStorage.setItem("username", "");
-  router.go("/");
+const userLogout = () => {
+  logout();
 };
 </script>

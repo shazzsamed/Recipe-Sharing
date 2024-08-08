@@ -49,4 +49,13 @@ export default class UsersController {
       response.badRequest(error.message);
     }
   }
+
+  public async logout({ auth, response }: HttpContextContract) {
+    try {
+      await auth.use("api").revoke();
+      response.ok({ message: "Logged out successfully" });
+    } catch (error) {
+      response.badRequest({ message: "Logout failed", error: error.message });
+    }
+  }
 }

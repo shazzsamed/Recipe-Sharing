@@ -49,12 +49,14 @@
           <v-btn color="primary" @click="goBack">Go Back</v-btn>
         </v-card-actions>
       </v-card>
+      <ReviewCard />
     </div>
   </v-app>
 </template>
 
 <script setup>
 import NavBar from "@/components/NavBar.vue";
+import ReviewCard from "@/components/ReviewCard.vue";
 import { useRecipeStore } from "@/stores/recipeStore";
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";

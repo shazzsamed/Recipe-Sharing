@@ -25,6 +25,7 @@
             <v-card-title>{{ recipe.title }}</v-card-title>
             <v-card-subtitle>By: {{ recipe.user_name }}</v-card-subtitle>
             <v-card-text>{{ recipe.description }}</v-card-text>
+            <v-rating :value="5" max="5" readonly dense></v-rating>
             <v-card-actions>
               <v-btn @click="openRecipe(recipe.id)">Open</v-btn>
               <v-btn
@@ -55,14 +56,22 @@ import NavBar from "@/components/NavBar.vue";
 import router from "@/router";
 import { onMounted, defineProps } from "vue";
 import { useRecipeStore } from "@/stores/recipeStore";
+import { useReviewStore } from "@/stores/reviewStore";
 
 const recipeStore = useRecipeStore();
+const reviewStore = useReviewStore();
 
 const props = defineProps({
   view: {
     type: String,
   },
 });
+
+const average = async (recipeId) => {
+  const responseAverage = await reviewStore.fetchAverage(recipeId);
+  console.log(typeof Number(responseAverage), Number(responseAverage));
+  return Number(responseAverage);
+};
 
 onMounted(async () => {
   await recipeStore.fetchRecipes(props.view);

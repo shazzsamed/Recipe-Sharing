@@ -5,7 +5,7 @@
       <h1 style="margin-bottom: 25px">
         {{ isEdit ? "Update Your Recipe" : "Submit Your Recipe" }} &#128522;
       </h1>
-      <v-form v-model="valid" ref="form">
+      <v-form v-model="valid" ref="formRef" @submit.prevent="submitForm">
         <v-container>
           <v-row>
             <v-text-field
@@ -50,18 +50,19 @@
               label="Cooking Time (minutes)"
               type="number"
               required
-              :rules="[rules.number]"
+              :rules="[rules.required, rules.number]"
             ></v-text-field>
           </v-row>
 
           <v-row>
             <v-col>
-              <v-btn @click="submitForm" color="primary">
+              <v-btn type="submit" color="primary">
                 {{ isEdit ? "Update" : "Submit" }}
               </v-btn>
             </v-col>
           </v-row>
         </v-container>
+        <span class="error">{{ createError }} </span>
       </v-form>
     </div>
   </v-app>
@@ -76,6 +77,8 @@ import { useRoute, useRouter } from "vue-router";
 const store = useRecipeStore();
 const route = useRoute();
 const router = useRouter();
+const createError = ref("");
+const formRef = ref(null);
 
 const recipe = ref({
   title: "",
@@ -94,7 +97,7 @@ const rules = {
   required: (value) => !!value || "Required.",
   number: (value) => !isNaN(value) || "Must be a number.",
   notPurelyNumeric: (value) =>
-    !/^\d+$/.test(value) || "Title must not be purely numeric.",
+    /[a-zA-Z0-9]+/.test(value) || "Title must not be purely numeric.",
 };
 
 const fetchRecipe = async () => {
@@ -102,25 +105,44 @@ const fetchRecipe = async () => {
     const id = route.params.id;
     try {
       const responseObject = await store.fetchRecipeById(id);
+      if (responseObject.user_id != localStorage.getItem("userId")) {
+        router.push("/403");
+        return;
+      }
       recipe.value = responseObject;
-      console.log(responseObject);
     } catch (err) {
       console.error("Failed to fetch recipe", err);
+      router.push("/");
     }
   }
 };
 
 const submitForm = async () => {
-  const isValid = await ref.form.validate();
+  const isValid = await formRef.value.validate();
 
-  if (isValid) {
+  if (isValid.valid) {
     if (isEdit) {
       await store.updateRecipe(route.params.id, recipe.value);
     } else {
       await store.createRecipe(recipe.value);
     }
-    router.push("/");
+    clearInputs();
+    router.push("/").then(() => {
+      window.location.reload();
+    });
+  } else {
+    createError.value = "Form validation failed.";
   }
+};
+
+const clearInputs = () => {
+  recipe.value = {
+    title: "",
+    description: "",
+    ingredients: "",
+    instructions: "",
+    cooking_time: null,
+  };
 };
 
 onMounted(() => {
@@ -139,5 +161,13 @@ onMounted(() => {
 
 .v-textarea {
   resize: vertical;
+}
+
+.error {
+  color: red;
+  font-size: 15px;
+  margin-top: 5px;
+  display: block;
+  text-align: center;
 }
 </style>

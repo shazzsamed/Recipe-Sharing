@@ -21,6 +21,7 @@
 import Route from "@ioc:Adonis/Core/Route";
 import "./routes/recipe";
 import "./routes/user";
+import "./routes/review";
 
 Route.get("/", async () => {
   return "Hello world from a slim app";

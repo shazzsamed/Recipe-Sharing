@@ -9,17 +9,26 @@ export const useRecipeStore = defineStore("recipeStore", () => {
   const searchQuery = ref("");
 
   const filteredRecipes = computed(() => {
-    return recipes.value.filter((recipe) =>
-      recipe.title.toLowerCase().includes(searchQuery.value.toLowerCase())
+    return recipes.value.filter(
+      (recipe) =>
+        recipe.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        recipe.description
+          .toLowerCase()
+          .includes(searchQuery.value.toLowerCase())
     );
   });
 
-  const fetchRecipes = async (view) => {
+  const fetchRecipes = async (view: String) => {
     loading.value = true;
     error.value = null;
     try {
       const response = await axios.get(
-        `${import.meta.env.VITE_APP_URL}/recipes`
+        `${import.meta.env.VITE_APP_URL}/recipes`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
       );
       const allRecipes = response.data;
 
@@ -29,24 +38,29 @@ export const useRecipeStore = defineStore("recipeStore", () => {
       } else {
         recipes.value = allRecipes;
       }
-    } catch (err) {
+    } catch (err: any) {
       error.value = err.message || "Failed to fetch recipes";
     } finally {
       loading.value = false;
     }
   };
 
-  const fetchRecipeById = async (recipeId: any) => {
+  const fetchRecipeById = async (recipeId: String) => {
     loading.value = true;
     error.value = null;
     try {
       console.log(`${import.meta.env.VITE_APP_URL}/recipes/${recipeId}`);
       const response = await axios.get(
-        `${import.meta.env.VITE_APP_URL}/recipes/${recipeId}`
+        `${import.meta.env.VITE_APP_URL}/recipes/${recipeId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
       );
       console.log("update response", response.data);
       return response.data;
-    } catch (err) {
+    } catch (err: any) {
       error.value = err.message || "Failed to fetch recipes";
     } finally {
       loading.value = false;
@@ -54,8 +68,6 @@ export const useRecipeStore = defineStore("recipeStore", () => {
   };
 
   const createRecipe = async (recipe: any) => {
-    loading.value = true;
-    error.value = null;
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_APP_URL}/recipes`,
@@ -67,7 +79,8 @@ export const useRecipeStore = defineStore("recipeStore", () => {
         }
       );
       recipes.value.push(response.data);
-    } catch (err) {
+      return response.data;
+    } catch (err: any) {
       error.value = err.message || "Failed to create recipe";
     } finally {
       loading.value = false;
@@ -78,7 +91,12 @@ export const useRecipeStore = defineStore("recipeStore", () => {
     try {
       const response = await axios.patch(
         `${import.meta.env.VITE_APP_URL}/recipes/${id}`,
-        updatedRecipe
+        updatedRecipe,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
       );
       return response.data;
     } catch (error) {
@@ -87,10 +105,15 @@ export const useRecipeStore = defineStore("recipeStore", () => {
     }
   };
 
-  const deleteRecipe = async (id) => {
+  const deleteRecipe = async (id: String) => {
     try {
       const response = await axios.delete(
-        `${import.meta.env.VITE_APP_URL}/recipes/${id}`
+        `${import.meta.env.VITE_APP_URL}/recipes/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        }
       );
       return response.data;
     } catch (error) {

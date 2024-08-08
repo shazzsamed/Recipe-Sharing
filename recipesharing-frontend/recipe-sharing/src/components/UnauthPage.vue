@@ -1,30 +1,30 @@
 <template>
-  <div class="not-found">
-    <h1>404 - Page Not Found</h1>
-    <p>Sorry, the page you are looking for does not exist.</p>
+  <div class="unauthorized">
+    <h1>403 - Unauthorized Access</h1>
+    <p>You do not have permission to view this page.</p>
     <router-link to="/">Go Back Home</router-link>
   </div>
 </template>
 
 <script>
 export default {
-  name: "NotFound",
+  name: "Unauthorized",
 };
 </script>
 
 <style scoped>
-.not-found {
+.unauthorized {
   text-align: center;
   margin-top: 100px;
 }
 
-.not-found a {
-  color: #42b983;
+.unauthorized a {
+  color: #d9534f;
   text-decoration: none;
   font-weight: bolder;
 }
 
-.not-found a:hover {
+.unauthorized a:hover {
   text-decoration: underline;
 }
 </style>

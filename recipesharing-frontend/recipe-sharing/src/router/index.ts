@@ -1,4 +1,5 @@
 import NotFound from "@/components/NotFound.vue";
+import UnauthPage from "@/components/UnauthPage.vue";
 import CreateView from "@/views/CreateView.vue";
 import LoginPage from "@/views/LoginPage.vue";
 import RecipeView from "@/views/RecipeView.vue";
@@ -45,6 +46,11 @@ const routes = [
     component: RegisterPage,
   },
   {
+    path: "/403",
+    name: "Unauth",
+    component: UnauthPage,
+  },
+  {
     path: "/:pathMatch(.*)*",
     name: "NotFound",
     component: NotFound,
@@ -59,7 +65,13 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("authToken");
 
-  const authRequiredRoutes = ["Dashboard", "Create", "Recipe"];
+  const authRequiredRoutes = [
+    "Dashboard",
+    "Create",
+    "Recipe",
+    "PersonalDashboard",
+    "UpdateRecipe",
+  ];
 
   if (authRequiredRoutes.includes(to.name) && !token) {
     next({ name: "Login" });
