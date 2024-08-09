@@ -6,4 +6,4 @@ Route.group(() => {
   Route.get("/rating/:id", "ReviewsController.averageRating");
   Route.delete("/reviews/:id", "ReviewsController.destroy");
   Route.patch("/reviews/:id", "ReviewsController.update");
-});
+}).middleware("auth");

@@ -7,8 +7,11 @@ export const useRecipeStore = defineStore("recipeStore", () => {
   const loading = ref(false);
   const error = ref(null);
   const searchQuery = ref("");
+  const meta = ref({
+    length: 0,
+  });
 
-  const searchRecipes = async (query) => {
+  const searchRecipes = async (query: String, view: String) => {
     try {
       const response = await axios.get(
         `${import.meta.env.VITE_APP_URL}/search`,
@@ -19,32 +22,48 @@ export const useRecipeStore = defineStore("recipeStore", () => {
           },
         }
       );
-      recipes.value = response.data;
-    } catch (error) {
-      console.error("Error fetching recipes:", error);
-    }
-  };
-
-  const fetchRecipes = async (view: String) => {
-    loading.value = true;
-    error.value = null;
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_APP_URL}/recipes`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        }
-      );
       const allRecipes = response.data;
-
       if (view === "Personal") {
         const userId = localStorage.getItem("userId");
         recipes.value = allRecipes.filter((recipe) => recipe.user_id == userId);
       } else {
         recipes.value = allRecipes;
       }
+    } catch (error) {
+      console.error("Error fetching recipes:", error);
+    }
+  };
+
+  const fetchRecipes = async (view: String, page: Number = 1) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      let response;
+      if (view == "Personal") {
+        response = await axios.get(
+          `${import.meta.env.VITE_APP_URL}/recipe/${localStorage.getItem(
+            "userId"
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
+        recipes.value = response.data;
+      } else {
+        response = await axios.get(
+          `${import.meta.env.VITE_APP_URL}/recipes/?page=${page}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          }
+        );
+        recipes.value = response.data.data;
+      }
+      meta.value.length =
+        response.data.meta.last_page - response.data.meta.first_page + 1;
     } catch (err: any) {
       error.value = err.message || "Failed to fetch recipes";
     } finally {
@@ -56,7 +75,6 @@ export const useRecipeStore = defineStore("recipeStore", () => {
     loading.value = true;
     error.value = null;
     try {
-      console.log(`${import.meta.env.VITE_APP_URL}/recipes/${recipeId}`);
       const response = await axios.get(
         `${import.meta.env.VITE_APP_URL}/recipes/${recipeId}`,
         {
@@ -134,6 +152,7 @@ export const useRecipeStore = defineStore("recipeStore", () => {
     loading,
     error,
     searchQuery,
+    meta,
     searchRecipes,
     fetchRecipes,
     createRecipe,

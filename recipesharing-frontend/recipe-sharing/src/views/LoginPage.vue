@@ -5,7 +5,7 @@
 
       <div class="form-group">
         <label for="email">Email</label>
-        <v-text-field v-model="email" :type="email" required></v-text-field>
+        <v-text-field v-model="email" type="email" required></v-text-field>
       </div>
 
       <div class="form-group">

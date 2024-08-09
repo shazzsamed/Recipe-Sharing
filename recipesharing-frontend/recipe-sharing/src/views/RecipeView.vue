@@ -46,7 +46,7 @@
         </v-card-text>
 
         <v-card-actions>
-          <v-btn color="primary" @click="goBack">Go Back</v-btn>
+          <v-btn color="primary" @click="router.go(-1)">Go Back</v-btn>
         </v-card-actions>
       </v-card>
       <ReviewCard />
@@ -69,10 +69,6 @@ const recipe = ref({});
 onMounted(async () => {
   recipe.value = await recipeStore.fetchRecipeById(route.params.id);
 });
-
-const goBack = () => {
-  router.back();
-};
 </script>
 
 <style scoped>

@@ -59,6 +59,15 @@
               <v-btn type="submit" color="primary">
                 {{ isEdit ? "Update" : "Submit" }}
               </v-btn>
+
+              <v-btn
+                type="button"
+                color="red"
+                class="ml-4"
+                @click="router.go(-1)"
+              >
+                Cancel
+              </v-btn>
             </v-col>
           </v-row>
         </v-container>
@@ -97,7 +106,7 @@ const rules = {
   required: (value) => !!value || "Required.",
   number: (value) => !isNaN(value) || "Must be a number.",
   notPurelyNumeric: (value) =>
-    /[a-zA-Z0-9]+/.test(value) || "Title must not be purely numeric.",
+    /[a-zA-Z]+/.test(value) || "Title must not be purely numeric.",
 };
 
 const fetchRecipe = async () => {

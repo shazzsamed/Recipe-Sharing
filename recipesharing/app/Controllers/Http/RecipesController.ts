@@ -6,12 +6,17 @@ export default class RecipesController {
     try {
       const searchQuery = request.input("q");
       const recipes = await Database.from("recipes")
-        .select("*")
+        .leftJoin("reviews", "recipes.id", "reviews.recipe_id")
+        .select("recipes.*")
+        .select(
+          Database.raw("COALESCE(AVG(reviews.rating), 0) as average_rating")
+        )
         .if(searchQuery, (query) => {
           query
             .where("title", "ILIKE", `%${searchQuery}%`)
             .orWhere("description", "ILIKE", `%${searchQuery}%`);
         })
+        .groupBy("recipes.id")
         .orderBy("created_at", "desc");
 
       response.status(200).json(recipes);
@@ -36,11 +41,30 @@ export default class RecipesController {
     try {
       const recipeId = request.param("id");
 
-      const candidates = await Database.from("recipes")
+      const recipes = await Database.from("recipes")
         .where("id", recipeId)
         .firstOrFail();
 
-      response.status(200).json(candidates);
+      response.status(200).json(recipes);
+    } catch (error) {
+      response.badRequest(error.messages);
+    }
+  }
+
+  public async getByUserId({ request, response }: HttpContextContract) {
+    try {
+      const userId = request.param("uid");
+
+      const recipes = await Database.from("recipes")
+        .where("recipes.user_id", userId)
+        .leftJoin("reviews", "recipes.id", "reviews.recipe_id")
+        .select("recipes.*")
+        .select(
+          Database.raw("COALESCE(AVG(reviews.rating), 0) as average_rating")
+        )
+        .groupBy("recipes.id");
+
+      response.status(200).json(recipes);
     } catch (error) {
       response.badRequest(error.messages);
     }
@@ -48,15 +72,30 @@ export default class RecipesController {
 
   public async show({ request, response }: HttpContextContract) {
     try {
-      const { sortBy = "id", order = "asc" } = request.qs();
+      const {
+        sortBy = "id",
+        order = "asc",
+        page = 1,
+        perPage = 10,
+      } = request.qs();
 
-      const recipes = await Database.from("recipes").orderBy(sortBy, order);
+      const recipes = await Database.from("recipes")
+        .leftJoin("reviews", "recipes.id", "reviews.recipe_id")
+        .select("recipes.*")
+        .select(
+          Database.raw("COALESCE(AVG(reviews.rating), 0) as average_rating")
+        )
+        .groupBy("recipes.id")
+        .orderBy(sortBy, order)
+        .paginate(page, perPage);
 
       response.status(200).json(recipes);
+      console.log(response.getBody());
     } catch (error) {
-      response.badRequest(error.messages);
+      response.badRequest(error.message);
     }
   }
+
   public async update({
     params,
     request,

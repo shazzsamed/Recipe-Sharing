@@ -1,7 +1,12 @@
 <template>
   <v-app>
     <NavBar />
-    <div v-if="recipeStore.loading">Loading...</div>
+    <div
+      v-if="recipeStore.loading"
+      style="display: flex; justify-content: center"
+    >
+      <h1>Loading...</h1>
+    </div>
     <div v-else class="maincontent">
       <v-text-field
         v-model="recipeStore.searchQuery"
@@ -11,10 +16,24 @@
         hide-details
         single-line
         width="80%"
-        @input="recipeStore.searchRecipes(recipeStore.searchQuery)"
+        @input="recipeStore.searchRecipes(recipeStore.searchQuery, props.view)"
       ></v-text-field>
       <v-col cols="10" md="10">
         <div class="mb-4">
+          <v-empty-state
+            v-if="recipeStore.recipes.length === 0"
+            :icon="props.view == 'Home' ? 'mdi-magnify' : 'mdi-chef-hat'"
+            :text="
+              props.view == 'Home'
+                ? 'Try adjusting your search terms or filters.'
+                : ''
+            "
+            :title="
+              props.view == 'Home'
+                ? 'We could not find a match.'
+                : 'Oops !!! Can\'t find anything'
+            "
+          ></v-empty-state>
           <v-card
             class="mb-4"
             v-for="recipe in recipeStore.recipes"
@@ -27,12 +46,17 @@
             <v-card-subtitle>By: {{ recipe.user_name }}</v-card-subtitle>
             <v-card-text>{{ recipe.description }}</v-card-text>
             <v-rating
-              :value="recipe.cooking_time"
-              max="60"
-              color="yellow"
+              :model-value="parseFloat(recipe.average_rating)"
+              max="5"
+              class="ml-3"
+              color="success"
+              :half-increments="true"
               readonly
-              dense
+              density="compact"
             ></v-rating>
+            <v-chip size="x-small" class="mb-4" color="primary"
+              >({{ parseFloat(recipe.average_rating).toPrecision(2) }})
+            </v-chip>
             <v-card-actions>
               <v-btn @click="openRecipe(recipe.id)">Open</v-btn>
               <v-btn
@@ -52,6 +76,13 @@
         </div>
       </v-col>
     </div>
+    <v-pagination
+      v-if="props.view == 'Home' && !recipeStore.searchQuery"
+      v-model="page"
+      :length="recipeStore.meta.length"
+      :total-visible="4"
+      @click="paginateRecipes"
+    ></v-pagination>
   </v-app>
   <button @click="createNewRecipe" class="bottom-right-btn">
     Create Recipe
@@ -61,12 +92,13 @@
 <script setup>
 import NavBar from "@/components/NavBar.vue";
 import router from "@/router";
-import { onMounted, defineProps } from "vue";
+import { onMounted, defineProps, ref, watch } from "vue";
 import { useRecipeStore } from "@/stores/recipeStore";
-import { useReviewStore } from "@/stores/reviewStore";
+import { useRoute } from "vue-router";
 
 const recipeStore = useRecipeStore();
-const reviewStore = useReviewStore();
+const page = ref(1);
+const route = useRoute();
 
 const props = defineProps({
   view: {
@@ -74,15 +106,23 @@ const props = defineProps({
   },
 });
 
-const average = (recipeId) => {
-  const responseAverage = reviewStore.fetchAverage(recipeId);
-  console.log(typeof Number(responseAverage), Number(responseAverage));
-  return 4;
+const paginateRecipes = async () => {
+  await recipeStore.fetchRecipes(props.view, page.value);
+  router.push({ query: { page: page.value } });
 };
 
 onMounted(async () => {
   await recipeStore.fetchRecipes(props.view);
 });
+
+watch(
+  () => route.query.page,
+  (newPage) => {
+    page.value = parseInt(newPage) || 1;
+    paginateRecipes();
+  },
+  { immediate: true }
+);
 
 const openRecipe = (id) => {
   router.push(`/recipe/${id}`);
